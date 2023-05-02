@@ -1,0 +1,67 @@
+@Component(value = "smartRoute")
+public class SmartRoute extends RouteBuilder {
+
+    @Autowired
+    private DataSource dataSource;
+
+    @Override
+    public void configure() throws Exception {
+
+        restConfiguration().component("servlet").bindingMode(RestBindingMode.auto);
+        rest().get("/train/{guid}")
+                .to("direct:getTrainInfo");
+
+        from("direct:getTrainInfo")
+                .routeId("getTrainInfo")
+                .process(this::process);
+    }
+
+    private void process(Exchange exchange) {
+        String guid = exchange.getIn().getHeader("guid", String.class);
+        var jdbcTemplate = new JdbcTemplate(dataSource);
+
+// селект
+        List<Map<String, Object>> sessions = jdbcTemplate.queryForList(
+                "SELECT * FROM sessions WHERE guid_session = ?",
+                guid);
+
+// если не найдена
+        if (sessions.isEmpty()) {
+            exchange.getMessage().setBody("No data found for guid: " + guid);
+        } else {
+            Map<String, Object> session = sessions.get(0);
+            LocalDateTime date = LocalDateTime.parse(session.get("date_session").toString());
+
+// выборка из таблицы
+            List<Map<String, Object>> trains = jdbcTemplate.queryForList(
+                    "SELECT * FROM trains WHERE dt_start > ? ORDER BY dt_start",
+                    date);
+
+// условие если дата не найдена
+            if (trains.isEmpty()) {
+                exchange.getMessage().setBody("No data found for guid: " + guid);
+            } else {
+                // Process the data using 5 threads and transform train_name to uppercase
+                List<String> results = new ArrayList<>();
+                int numThreads = 5;
+                ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+                CountDownLatch latch = new CountDownLatch(trains.size());
+                for (Map<String, Object> train : trains) {
+                    executorService.submit(() -> {
+                        String trainName = train.get("train_name").toString();
+                        train.put("train_name", trainName.toUpperCase());
+                        results.add(new Gson().toJson(train));
+                        latch.countDown();
+                    });
+                }
+                latch.await();
+                executorService.shutdown();
+
+                // присваивает телу результат
+                exchange.getMessage().setBody(results);
+            }
+        }
+    }
+}
+
+

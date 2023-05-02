@@ -1,13 +1,12 @@
 package com.example.testcamel.service;
 
-import com.example.testcamel.model.TrainDTO;
+import com.example.testcamel.dto.TrainDTO;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
 import org.apache.camel.Exchange;
 
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component
 public class ProtobufService {
