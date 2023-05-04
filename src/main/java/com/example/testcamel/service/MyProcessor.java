@@ -16,16 +16,8 @@ public class MyProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         TrainDTO trainDTO = exchange.getIn().getBody(TrainDTO.class);
         ServletRequest request = exchange.getIn().getBody(HttpServletRequest.class);
-        trainDTO.setDate(trainDTO.getDate());
-
-    //    Протестировано, не работают, возвращают null
-    //    trainDTO.setIp(exchange.getIn().getHeader("CamelHttpRemoteAddress", String.class));
-    //    trainDTO.setIp(exchange.getIn().getHeader("X-Forwarded-For", String.class));
-
-    //  Возвращает 0:0:0:0:0:0:0:1
-        trainDTO.setIp(request.getRemoteAddr());
-
         trainDTO.setTime(LocalTime.now().toString());
+        trainDTO.setIp(request.getRemoteAddr());
         trainDTO.setGuid(UUID.randomUUID().toString());
         exchange.getIn().setBody(trainDTO);
     }
