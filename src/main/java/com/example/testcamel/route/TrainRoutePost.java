@@ -30,15 +30,12 @@ public class TrainRoutePost extends RouteBuilder {
                 .log("Что попадает в конвектор: " + "${body}")
                 .process(exchange -> {
                     ServletRequest request = exchange.getIn().getBody(HttpServletRequest.class);
-                    TrainDTO trainDTO = new TrainDTO();
-                    trainDTO.setDate(exchange.getIn().getBody(DateDTO.class).getDate().toString());
-                    trainDTO.setTime(LocalTime.now().toString());
-                    trainDTO.setIp(request.getRemoteAddr());
-
-
-                 //   trainDTO.setIp(exchange.getIn().getHeader(Exchange.HTTP_HOST, String.class));
-
-                    trainDTO.setGuid(UUID.randomUUID().toString());
+                    TrainDTO trainDTO = TrainDTO.builder()
+                            .date(exchange.getIn().getBody(DateDTO.class).getDate().toString())
+                            .time(LocalTime.now().toString())
+                            .ip(request.getRemoteAddr())
+                            .guid(UUID.randomUUID().toString())
+                            .build();
                     exchange.getIn().setBody(trainDTO);
                 })
                 .setProperty("bodyValue", body()) // сохраняю body в переменную bodyValue
@@ -78,3 +75,5 @@ public class TrainRoutePost extends RouteBuilder {
                 .to("log:output");
     }
 }
+// Неработающие варианты
+//   trainDTO.setIp(exchange.getIn().getHeader(Exchange.HTTP_HOST, String.class));
