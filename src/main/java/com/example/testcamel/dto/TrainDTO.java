@@ -11,18 +11,17 @@ import javax.xml.bind.annotation.XmlElement;
 @NoArgsConstructor
 @Data
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TrainDTO {
     @XmlElement
-    String time;
+    private String time;
 
     @XmlElement
-    String ip;
+    private String ip;
 
     @XmlElement
-    String date;
+    private String date;
 
     @XmlElement
-    String guid;
+    private String guid;
 }
