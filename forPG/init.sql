@@ -1,6 +1,5 @@
 CREATE TABLE sessions
 (
-    id_session   BIGSERIAL PRIMARY KEY,
     ip_session   VARCHAR(255),
     guid_session VARCHAR(255),
     time_session VARCHAR(255),

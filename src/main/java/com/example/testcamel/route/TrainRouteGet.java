@@ -16,6 +16,7 @@ public class TrainRouteGet extends RouteBuilder {
                 .to("direct:checkGuid");
 
         from("direct:checkGuid")
+                .routeId("checkGuid")
                 .setBody(header("guid"))
                 .log("Полученный GUID из второго реста: ${body}")
 

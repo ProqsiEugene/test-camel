@@ -2,7 +2,6 @@ package com.example.testcamel.route;
 
 import com.example.testcamel.dto.DateDTO;
 import com.example.testcamel.dto.TrainDTO;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
@@ -76,4 +75,17 @@ public class TrainRoutePost extends RouteBuilder {
     }
 }
 // Неработающие варианты
-//   trainDTO.setIp(exchange.getIn().getHeader(Exchange.HTTP_HOST, String.class));
+//   trainDTO.setIp(exchange.getIn().getHeader(Exchange.HTTP_HOST, String.class));  //null
+//   .ip(exchange.getIn().getHeader("X-Forwarded-For", String.class))  //null
+//   .ip(exchange.getIn().getHeader("CamelServletRemoteAddress", String.class))  //null
+//   .ip(exchange.getIn().getHeader(Exchange.HTTP_URI, String.class)  // ip=/camel/train
+//   .ip(exchange.getIn().getHeader(Exchange.LOG_EIP_NAME, String.class))  //null
+//   .ip(exchange.getIn().getHeader(Exchange.DEFAULT_CHARSET_PROPERTY, String.class)) //null
+//   .ip(exchange.getIn().getHeader(Exchange.DESTINATION_OVERRIDE_URL, String.class))  //null
+//   .ip(exchange.getIn().getHeader(Exchange.HTTP_BASE_URI, String.class))
+//   .ip(String.valueOf(request.getLocalPort()))  //8080
+//   .ip(String.valueOf(request.getLocalAddr()))  //0000001
+//   .ip(String.valueOf(request.getRemotePort()))  //58996
+//   .ip(String.valueOf(request.getRemoteHost()))  //000001
+//   .ip(String.valueOf(request.getRemotePort()))  //59149
+//   .ip(String.valueOf(request.getRemotePort())) //59...
