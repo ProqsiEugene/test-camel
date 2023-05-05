@@ -5,12 +5,13 @@ import lombok.*;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 
-@Entity(name = "trains")
-@Getter
-@Setter
+@Entity
+@Table(name = "trains")
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +22,7 @@ public class Train {
     private Long idTrain;
 
     @Column(name = "dt_start")
-    private LocalDateTime dt_start;
+    private String dt_start;
 
     @Column(name = "id_station_start")
     private Long idStationStart;

@@ -30,12 +30,10 @@ public class TrainRoutePost extends RouteBuilder {
                 .log("Что попадает в конвектор1: " + "${body}")
                 .to("log:?showBody=true&showHeaders=true") // смотрю все заголовки для определения ip
                 .process(exchange -> {
-                    ServletRequest request = exchange.getIn().getBody(HttpServletRequest.class);
+                //    ServletRequest request = exchange.getIn().getBody(HttpServletRequest.class);
                     TrainDTO trainDTO = TrainDTO.builder()
                             .date(exchange.getIn().getBody(DateDTO.class).getDate().toString())
                             .time(LocalTime.now().toString())
-                           // .ip(request.getRemoteAddr())
-                           //.ip(exchange.getIn().getHeader("CamelHttpUrl", String.class))
                             .ip(exchange.getIn().getHeader("host", String.class))
                             .guid(UUID.randomUUID().toString())
                             .build();
@@ -67,6 +65,16 @@ public class TrainRoutePost extends RouteBuilder {
                 .setBody(simple("${exchangeProperty.bodyValue}"))
                 .log("После метода setBody в sendDtoToDB: " + "${body}")
                 .log("${body.getTime}")
+
+//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session (guidSession) values ('${body.getGuid}')")
+//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session (timeSession, ipSession, dateSession, guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
+//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session  (timeSession, ipSession, dateSession, guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
+//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session s (s.timeSession, s.ipSession, s.dateSession, s.guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
+//                .toD("jpa:com.example.testcamel.model.Session?query=INSERT INTO Session s (s.timeSession, s.ipSession, s.dateSession, s.guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
+//                .toD("jpa:com.example.testcamel.model.Session?query=INSERT INTO sessions (timeSession, ipSession, dateSession, guidSession) values (${body.getTime}, ${body.getIp}, ${body.getDate}, ${body.getGuid})")
+//
+//                .toD("jpa:com.example.testcamel.model.Session?query=select dateSession from Session o where  o.guidSession = '${body}'")
+
                 .to("sql:INSERT INTO sessions (time_session, ip_session, date_session, guid_session) " +
                         "values (:#${body.getTime}, :#${body.getIp}, :#${body.getDate}, :#${body.getGuid})")
                 .to("log:output")
@@ -80,18 +88,3 @@ public class TrainRoutePost extends RouteBuilder {
                 .to("log:output");
     }
 }
-// Неработающие варианты
-//   trainDTO.setIp(exchange.getIn().getHeader(Exchange.HTTP_HOST, String.class));  //null
-//   .ip(exchange.getIn().getHeader("X-Forwarded-For", String.class))  //null
-//   .ip(exchange.getIn().getHeader("CamelServletRemoteAddress", String.class))  //null
-//   .ip(exchange.getIn().getHeader(Exchange.HTTP_URI, String.class)  // ip=/camel/train
-//   .ip(exchange.getIn().getHeader(Exchange.LOG_EIP_NAME, String.class))  //null
-//   .ip(exchange.getIn().getHeader(Exchange.DEFAULT_CHARSET_PROPERTY, String.class)) //null
-//   .ip(exchange.getIn().getHeader(Exchange.DESTINATION_OVERRIDE_URL, String.class))  //null
-//   .ip(exchange.getIn().getHeader(Exchange.HTTP_BASE_URI, String.class))
-//   .ip(String.valueOf(request.getLocalPort()))  //8080
-//   .ip(String.valueOf(request.getLocalAddr()))  //0000001
-//   .ip(String.valueOf(request.getRemotePort()))  //58996
-//   .ip(String.valueOf(request.getRemoteHost()))  //000001
-//   .ip(String.valueOf(request.getRemotePort()))  //59149
-//   .ip(String.valueOf(request.getRemotePort())) //59...

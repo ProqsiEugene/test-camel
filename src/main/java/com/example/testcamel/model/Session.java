@@ -1,17 +1,16 @@
 package com.example.testcamel.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
-@Entity(name = "sessions")
-@Getter
-@Setter
+@Entity
+@Table(name = "sessions")
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Session {
@@ -21,7 +20,7 @@ public class Session {
     private Long idSession;
 
     @Column(name = "ip_session")
-    private Long ipSession;
+    private String ipSession;
 
     @Column(name = "guid_session")
     private String guidSession;
