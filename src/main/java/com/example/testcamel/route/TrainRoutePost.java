@@ -64,19 +64,10 @@ public class TrainRoutePost extends RouteBuilder {
                 .log("До метода setBody в sendDtoToDB: " + "${body}")
                 .setBody(simple("${exchangeProperty.bodyValue}"))
                 .log("После метода setBody в sendDtoToDB: " + "${body}")
-                .log("${body.getTime}")
 
-//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session (guidSession) values ('${body.getGuid}')")
-//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session (timeSession, ipSession, dateSession, guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
-//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session  (timeSession, ipSession, dateSession, guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
-//                .toD("jpa:com.example.testcamel.model.Session?query=insert into Session s (s.timeSession, s.ipSession, s.dateSession, s.guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
-//                .toD("jpa:com.example.testcamel.model.Session?query=INSERT INTO Session s (s.timeSession, s.ipSession, s.dateSession, s.guidSession) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
-//                .toD("jpa:com.example.testcamel.model.Session?query=INSERT INTO sessions (timeSession, ipSession, dateSession, guidSession) values (${body.getTime}, ${body.getIp}, ${body.getDate}, ${body.getGuid})")
-//
-//                .toD("jpa:com.example.testcamel.model.Session?query=select dateSession from Session o where  o.guidSession = '${body}'")
-
-                .to("sql:INSERT INTO sessions (time_session, ip_session, date_session, guid_session) " +
-                        "values (:#${body.getTime}, :#${body.getIp}, :#${body.getDate}, :#${body.getGuid})")
+                .to("log:?showBody=true&showHeaders=true") // смотрю все заголовки для определения ip
+                .toD("jpa:com.example.testcamel.model.Session?nativeQuery=insert into sessions (time_session, ip_session, " +
+                        "date_session, guid_session) values ('${body.getTime}', '${body.getIp}', '${body.getDate}', '${body.getGuid}')")
                 .to("log:output")
                 .to("direct:fromDtoToDB");
 
