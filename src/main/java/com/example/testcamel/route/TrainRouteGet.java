@@ -1,13 +1,14 @@
 package com.example.testcamel.route;
 
-import com.example.testcamel.dto.TrainDTO;
 import com.example.testcamel.model.Train;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component(value = "trainRouteGet")
 public class TrainRouteGet extends RouteBuilder {
+    ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void configure() throws Exception {
@@ -23,40 +24,28 @@ public class TrainRouteGet extends RouteBuilder {
                 .log("Полученный GUID из второго реста: ${body}")
                 .toD("jpa:com.example.testcamel.model.Session?query=select dateSession from Session o where  o.guidSession = '${body}'")
                 .log("После DB: ${body}")
-                .choice()
-                .when(body().regex("^\\s*$"))
-                //.when(body().isNull())
-                .setBody(constant("GUID not found"))
-                //.throwException(new Exception("GUID not found"))
-                .otherwise()
-            .toD("jpa:com.example.testcamel.model.Train?query=select idTrain, dt_start, idStationStart, trainName from Train where dt_start > '${body}'")
+                    .choice()
+                        .when(body().regex("^\\s*$"))
+                        .setBody(constant("GUID not found"))
+                    .otherwise()
+                .toD("jpa:com.example.testcamel.model.Train?query=select idTrain, dt_start, idStationStart, trainName from Train where dt_start > '${body}'")
                 .split().body().threads(5)
-                .to("log:?showBody=true&showHeaders=true")
                 .process(exchange -> {
+                    String json = objectMapper.writeValueAsString(exchange.getIn().getBody());
+                    String[] fields = json.split(",");
 
+                    Train train = Train.builder()
+                            .idTrain(Long.parseLong(fields[0].replaceAll("\\D+", "")))
+                            .dt_start(fields[1])
+                            .idStationStart(Long.parseLong(fields[2].replaceAll("\\D+", "")))
+                            .trainName(fields[3].replaceAll("\\]", "").toUpperCase())
+                            .build();
+                    exchange.getIn().setBody(train);
                 })
                 .to("log:output");
     }
 }
-//                .to("sql:SELECT id_train, upper(train_name) AS train_name, id_station_start, dt_start" +
-//                        " from trains WHERE dt_start > (select date_session FROM sessions where guid_session = :#${body})" +
-//                        " ORDER BY dt_start")
-
-
-//                .choice()
-//                .when(simple("${body} =='null'"))
-//                .setBody(constant("Неправильный guid"))
-//                .endChoice()
-//                .otherwise()
-//                .choice()
-//                    .when(body().isNull())
-//                        .setBody(constant("Неправильный guid"))
-//                        .endChoice()
-
 // Работает правильно НО не JPA
 //                .to("sql:SELECT id_train, upper(train_name) AS train_name, id_station_start, dt_start" +
 //                        " from trains WHERE dt_start > (select date_session FROM sessions where guid_session = :#${body})" +
 //                        " ORDER BY dt_start")
-//                .end()
-//                .split().body().threads(5)
-//                .log("Результат: ${body}")
