@@ -56,13 +56,17 @@ public class TrainRoutePost extends RouteBuilder {
                 .routeId("sendToKafka")
                 .to("kafka:{{kafka.topic}}?brokers={{kafka.brokers}}")
                 .transform().simple("${body}")
-                .setBody(simple("${exchangeProperty.bodyValue.getGuid}")) //достаю тело из переменной bodyValue и сохр в body
-                .to("direct:sendDtoToDB");
+                .setBody(simple("${exchangeProperty.bodyValue.getGuid}")); //достаю тело из переменной bodyValue и сохр в body
+           //     .to("direct:sendDtoToDB");
 
-        from("direct:sendDtoToDB")
+        from("kafka:{{kafka.topic}}?brokers={{kafka.brokers}}")
                 .routeId("sendDtoToDB")
-                .log("До метода setBody в sendDtoToDB: " + "${body}")
-                .setBody(simple("${exchangeProperty.bodyValue}"))
+                .log("Что читаю из кафки: " + "${body}")
+                .to("bean:protobufService?method=convertProtobufToDto")
+                .log("Что читаю из кафки после конвертации: " + "${body}")
+
+
+                .setBody(simple("${body}"))
                 .log("После метода setBody в sendDtoToDB: " + "${body}")
 
                 .to("log:?showBody=true&showHeaders=true") // смотрю все заголовки для определения ip

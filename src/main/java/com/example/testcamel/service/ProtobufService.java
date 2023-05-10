@@ -21,4 +21,10 @@ public class ProtobufService {
             linkedBuffer.clear();
         }
     }
+    public TrainDTO convertProtobufToDto(byte[] protobuf) {
+        RuntimeSchema<TrainDTO> runtimeSchema = RuntimeSchema.createFrom(TrainDTO.class);
+        TrainDTO trainDto = new TrainDTO();
+        ProtobufIOUtil.mergeFrom(protobuf, trainDto, runtimeSchema);
+        return trainDto;
+    }
 }
