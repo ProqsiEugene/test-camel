@@ -1,14 +1,12 @@
 package com.example.testcamel.route;
 
 import com.example.testcamel.model.Train;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
 
 @Component(value = "trainRouteGet")
 public class TrainRouteGet extends RouteBuilder {
-    ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void configure() throws Exception {
@@ -28,18 +26,13 @@ public class TrainRouteGet extends RouteBuilder {
                         .when(body().regex("^\\s*$"))
                         .setBody(constant("GUID not found"))
                     .otherwise()
-                .toD("jpa:com.example.testcamel.model.Train?query=select idTrain, dt_start, idStationStart, trainName from Train where dt_start > '${body}'")
+                .toD("jpa:com.example.testcamel.model.Train?query=select o from Train o where o.dt_start > '${body}'")
                 .split().body().threads(5)
-                .process(exchange -> {
-                    String json = objectMapper.writeValueAsString(exchange.getIn().getBody());
-                    String[] fields = json.split(",");
 
-                    Train train = Train.builder()
-                            .idTrain(Long.parseLong(fields[0].replaceAll("\\D+", "")))
-                            .dt_start(fields[1])
-                            .idStationStart(Long.parseLong(fields[2].replaceAll("\\D+", "")))
-                            .trainName(fields[3].replaceAll("\\]", "").toUpperCase())
-                            .build();
+                .process(exchange -> {
+                    Train train = exchange.getIn().getBody(Train.class);
+                    String upperCaseName = train.getTrainName().toUpperCase();
+                    train.setTrainName(upperCaseName);
                     exchange.getIn().setBody(train);
                 })
                 .to("log:output");
